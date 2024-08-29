@@ -1,4 +1,4 @@
-from scapy.all import Dot11, Dot11Deauth, RadioTap, sendp
+from scapy.all import Dot11, Dot11Deauth, RadioTap, sendp, Dot11Beacon, Dot11Elt
 import subprocess
 import time
 import os
