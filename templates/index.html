@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Advanced WiFi Penetration Testing Tool</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</head>
+<body>
+<div class="container mt-5">
+    <h1 class="text-center">Advanced WiFi Penetration Testing Tool</h1>
+    
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <h2>Scan WiFi Networks</h2>
+            <button class="btn btn-primary" onclick="scanWifi()">Scan WiFi Networks</button>
+            <pre id="wifiScanResult"></pre>
+        </div>
+        <div class="col-md-6">
+            <h2>Scan Connected Devices</h2>
+            <input type="text" id="targetIpRange" placeholder="e.g., 192.168.1.0/24" class="form-control mb-2">
+            <button class="btn btn-primary" onclick="scanDevices()">Scan Devices</button>
+            <pre id="deviceScanResult"></pre>
+        </div>
+    </div>
+    
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <h2>Perform Attack</h2>
+            <select id="attackType" class="form-control mb-2">
+                <option value="deauth">Deauth Attack</option>
+                <option value="handshake_capture">Handshake Capture</option>
+                <option value="evil_twin">Evil Twin Attack</option>
+                <option value="wps_bruteforce">WPS Brute-force</option>
+                <option value="mitm">MITM Attack</option>
+                <option value="arp_spoof_bypass">ARP Spoof Bypass</option>
+                <option value="mac_filter_bypass">MAC Filter Bypass</option>
+                <option value="dns_spoofing">DNS Spoofing</option>
+            </select>
+            <input type="text" id="targetMac" placeholder="Target MAC Address" class="form-control mb-2">
+            <input type="text" id="gatewayMac" placeholder="Gateway MAC Address (if required)" class="form-control mb-2">
+            <input type="text" id="interface" placeholder="Network Interface (e.g., wlan0)" class="form-control mb-2">
+            <button class="btn btn-primary" onclick="performAttack()">Perform Attack</button>
+            <pre id="attackResult"></pre>
+        </div>
+        <div class="col-md-6">
+            <h2>Advanced Attack</h2>
+            <select id="advancedAttackType" class="form-control mb-2">
+                <option value="karma">Karma Attack</option>
+                <option value="mac_spoof">MAC Address Spoofing</option>
+                <option value="dhcp_spoof">DHCP Spoofing</option>
+                <option value="ssl_stripping">SSL Stripping</option>
+            </select>
+            <input type="text" id="newMac" placeholder="New MAC Address (if required)" class="form-control mb-2">
+            <input type="text" id="advancedInterface" placeholder="Network Interface (e.g., wlan0)" class="form-control mb-2">
+            <button class="btn btn-primary" onclick="performAdvancedAttack()">Perform Advanced Attack</button>
+            <pre id="advancedAttackResult"></pre>
+        </div>
+    </div>
+</div>
+
+<script>
+    function scanWifi() {
+        fetch('/scan_wifi')
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('wifiScanResult').textContent = JSON.stringify(data, null, 2);
+            });
+    }
+
+    function scanDevices() {
+        const targetIpRange = document.getElementById('targetIpRange').value;
+        fetch(`/scan_devices?target_ip_range=${targetIpRange}`)
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('deviceScanResult').textContent = JSON.stringify(data, null, 2);
+            });
+    }
+
+    function performAttack() {
+        const attackType = document.getElementById('attackType').value;
+        const targetMac = document.getElementById('targetMac').value;
+        const gatewayMac = document.getElementById('gatewayMac').value;
+        const interface = document.getElementById('interface').value;
+
+        fetch('/perform_attack', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({attack_type: attackType, target_mac: targetMac, gateway_mac: gatewayMac, interface: interface})
+        }).then(response => response.json())
+          .then(data => document.getElementById('attackResult').textContent = data.status);
+    }
+
+    function performAdvancedAttack() {
+        const attackType = document.getElementById('advancedAttackType').value;
+        const newMac = document.getElementById('newMac').value;
+        const advancedInterface = document.getElementById('advancedInterface').value;
+
+        fetch('/perform_advanced_attack', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({attack_type: attackType, new_mac: newMac, interface: advancedInterface})
+        }).then(response => response.json())
+          .then(data => document.getElementById('advancedAttackResult').textContent = data.status);
+    }
+</script>
+</body>
+</html>

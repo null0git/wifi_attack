@@ -1,0 +1,6 @@
+Flask
+scapy
+pywifi
+netifaces
+mac-vendor-lookup
+requests
